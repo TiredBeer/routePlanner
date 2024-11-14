@@ -126,7 +126,7 @@
 <div class="hello">Hello</div>
 
 <!-- Кнопка -->
-<button class="button" onclick="incrementCounter()">Click Me</button>
+<button class="button" onclick="incrementCounter(); sendCounter(counter);">Click Me</button>
 
 <!-- Отображение счётчика -->
 <div id="counterDisplay" style="color: #fff; font-size: 1.5rem; margin-top: 10px;">Clicks: 0</div>
@@ -139,6 +139,20 @@
     function incrementCounter() {
         counter++;  // Увеличиваем счётчик
         document.getElementById("counterDisplay").innerText = "Clicks: " + counter;  // Обновляем отображение
+    }
+
+    // Функция для отправки данных на сервер
+    function sendCounter(counterValue) {
+        fetch("http://127.0.0.1:8000/update_counter", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ counter: counterValue })
+        })
+        .then(response => response.json())
+        .then(data => console.log("Response from server:", data))
+        .catch(error => console.error("Error:", error));
     }
 </script>
 </body>

@@ -52,13 +52,13 @@ class BDRequests:
     def get_geographic_coordinates(address: str) -> GeodesicCoordinates:
         parser = APIYandex.YandexApiGeocoderParser()
         response = parser.get_cords(address)
-        return GeodesicCoordinates(response[0], response[1])
+        return GeodesicCoordinates(response[1], response[0])
 
     @staticmethod
     def get_points(start_point: GeodesicCoordinates, length: float, tags) \
             -> set[Point]:
         length = math.sqrt(2) * length
-        delta = 0.0001
+        delta = 0.0000001
         bottom_left = GeodesicCoordinates(start_point.longitude,
                                           start_point.latitude)
         top_right = GeodesicCoordinates(start_point.longitude,
@@ -70,8 +70,8 @@ class BDRequests:
                     start_point).get_length() >= length:
                 break
         while True:
-            top_right.latitude -= delta
-            top_right.longitude -= delta
+            top_right.latitude += delta
+            top_right.longitude += delta
             if top_right.convert_to_plane(start_point).get_length() >= length:
                 break
         db = Address.DatabaseConnector()
@@ -83,7 +83,7 @@ class BDRequests:
         db.close_data_base()
         for point in response:
             address = GeodesicCoordinates(point.lat, point.lon)
-            points.add(Point(address, point.tags))
+            points.add(Point(address, point.amenity))
         return points
 
 
@@ -155,12 +155,12 @@ class PathFinder:
 #
 if __name__ == '__main__':
 
-    pf = PathFinder('Фонвизина 8', 200, ['bar'])
+    pf = PathFinder('Фонвизина 8', 2, ['art_object'])
 #     points = {Point(GeodesicCoordinates(0.01, -0.01)),
 #               Point(GeodesicCoordinates(0.01, 0.01)),
 #               Point(GeodesicCoordinates(0.02, 0.02)),
 #               Point(GeodesicCoordinates(0.03, 0.00))}
 #     pathfinder = PathFinder(GeodesicCoordinates(0, 0), points, 7)
     paaths = pf.find_all_paths()
-#     paath = pathfinder.find_path()
-#     print(paath)
+    paath = pf.find_path()
+    print(paath)

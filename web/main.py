@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import pathfinder
+
 
 app = FastAPI()
 
@@ -22,9 +24,10 @@ class Query(BaseModel):
 
 @app.post("/api/places/search/")
 async def search_places(data: Query):
-    # Здесь вы можете добавить логику поиска интересных мест
-    # Пример данных для демонстрации
     print(data)
+    pf = pathfinder.PathFinder(data.address, data.radius, data.place_type)
+    pf.find_path()
+    print(pf.points)
     results = [
         {"name": "Музей искусств", "address": "ул. Ленина, 10"},
         {"name": "Театр драмы", "address": "просп. Мира, 5"}

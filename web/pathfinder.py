@@ -28,6 +28,9 @@ class GeodesicCoordinates:
                                  0)
         return PlaneCoordinates(result[0], result[1])
 
+    def __repr__(self):
+        return f'{self.latitude},{self.longitude}'
+
 
 class Point:
     def __init__(self, address: GeodesicCoordinates,
@@ -37,6 +40,9 @@ class Point:
 
     def get_tags(self) -> set[str]:
         return self.tags
+
+    def __repr__(self):
+        return f'{self.coordinates}'
 
 
 class BDRequests:
@@ -49,7 +55,7 @@ class BDRequests:
         return GeodesicCoordinates(response[0], response[1])
 
     @staticmethod
-    def get_points(start_point: GeodesicCoordinates, length: float) \
+    def get_points(start_point: GeodesicCoordinates, length: float, tags) \
             -> set[Point]:
         length = math.sqrt(2) * length
         delta = 0.0001
@@ -69,9 +75,12 @@ class BDRequests:
             if top_right.convert_to_plane(start_point).get_length() >= length:
                 break
         db = Address.DatabaseConnector()
+        db.connect_to_db()
         response = db.get_answer(bottom_left.longitude, top_right.longitude,
-                                                        bottom_left.latitude, top_right.latitude)
+                                 bottom_left.latitude, top_right.latitude,
+                                 tags)
         points = set()
+        db.close_data_base()
         for point in response:
             address = GeodesicCoordinates(point.lat, point.lon)
             points.add(Point(address, point.tags))
@@ -81,13 +90,13 @@ class BDRequests:
 class PathFinder:
     meters_per_hour = 3000
 
-    def __init__(self, address: str, points: set[Point],
-                 desired_time: float) -> None:
+    def __init__(self, address: str, desired_time: float,
+                 tags) -> None:
         start_loc = BDRequests.get_geographic_coordinates(address)
         self.start_point = Point(start_loc)
         self.current_point = self.start_point
         self.desired_length = desired_time * PathFinder.meters_per_hour
-        self.points = points
+        self.points = BDRequests.get_points(start_loc, self.desired_length, tags)
         self.points.add(self.start_point)
         self.plane_points = dict[Point, PlaneCoordinates]()
         self.update_distances()
@@ -142,14 +151,16 @@ class PathFinder:
         for point in self.points:
             self.plane_points[point] = point.coordinates.convert_to_plane(
                 self.current_point.coordinates)
-
-
+#
+#
 if __name__ == '__main__':
-    points = {Point(GeodesicCoordinates(0.01, -0.01)),
-              Point(GeodesicCoordinates(0.01, 0.01)),
-              Point(GeodesicCoordinates(0.02, 0.02)),
-              Point(GeodesicCoordinates(0.03, 0.00))}
-    pathfinder = PathFinder(GeodesicCoordinates(0, 0), points, 7)
-    paaths = pathfinder.find_all_paths()
-    paath = pathfinder.find_path()
-    print(paath)
+
+    pf = PathFinder('Фонвизина 8', 200, ['bar'])
+#     points = {Point(GeodesicCoordinates(0.01, -0.01)),
+#               Point(GeodesicCoordinates(0.01, 0.01)),
+#               Point(GeodesicCoordinates(0.02, 0.02)),
+#               Point(GeodesicCoordinates(0.03, 0.00))}
+#     pathfinder = PathFinder(GeodesicCoordinates(0, 0), points, 7)
+    paaths = pf.find_all_paths()
+#     paath = pathfinder.find_path()
+#     print(paath)

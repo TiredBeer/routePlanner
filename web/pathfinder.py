@@ -58,11 +58,11 @@ class BDRequests:
     def get_points(start_point: GeodesicCoordinates, length: float, tags) \
             -> set[Point]:
         length = math.sqrt(2) * length
-        delta = 0.0000001
-        bottom_left = GeodesicCoordinates(start_point.longitude,
-                                          start_point.latitude)
-        top_right = GeodesicCoordinates(start_point.longitude,
-                                        start_point.latitude)
+        delta = 0.000001
+        bottom_left = GeodesicCoordinates(start_point.latitude,
+                                          start_point.longitude)
+        top_right = GeodesicCoordinates(start_point.latitude,
+                                        start_point.longitude)
         while True:
             bottom_left.latitude -= delta
             bottom_left.longitude -= delta

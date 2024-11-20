@@ -1,48 +1,11 @@
 import math
-import pymap3d as pm
-import Address
-import APIYandex
 
+from Address import DatabaseConnector
+from APIYandex import YandexApiGeocoderParser
 
-class PlaneCoordinates:
-    def __init__(self, x: float, y: float):
-        self.x = x
-        self.y = y
-
-    def get_distance_to(self, other) -> float:
-        return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
-
-    def get_length(self):
-        return math.sqrt(self.x ** 2 + self.y ** 2)
-
-
-class GeodesicCoordinates:
-    def __init__(self, latitude: float, longitude: float):
-        self.latitude = latitude
-        self.longitude = longitude
-
-    def convert_to_plane(self, conversion_point) -> PlaneCoordinates:
-        result = pm.geodetic2enu(self.latitude, self.longitude, 0,
-                                 conversion_point.latitude,
-                                 conversion_point.longitude,
-                                 0)
-        return PlaneCoordinates(result[0], result[1])
-
-    def __repr__(self):
-        return f'{self.latitude},{self.longitude}'
-
-
-class Point:
-    def __init__(self, address: GeodesicCoordinates,
-                 tags: set[str] = None):
-        self.coordinates = address
-        self.tags = tags
-
-    def get_tags(self) -> set[str]:
-        return self.tags
-
-    def __repr__(self):
-        return f'{self.coordinates}'
+from PointObject.Point import Point
+from PointObject.PlaneCoordinates import PlaneCoordinates
+from PointObject.GeodesicCoordinates import GeodesicCoordinates
 
 
 class BDRequests:
@@ -51,7 +14,7 @@ class BDRequests:
 
     @staticmethod
     def get_geographic_coordinates(address: str) -> GeodesicCoordinates:
-        parser = APIYandex.YandexApiGeocoderParser()
+        parser = YandexApiGeocoderParser()
         response = parser.get_cords(address)
         return GeodesicCoordinates(response[1], response[0])
 
@@ -74,17 +37,12 @@ class BDRequests:
             top_right.longitude += BDRequests.approximation_delta
             if top_right.convert_to_plane(start_point).get_length() >= length:
                 break
-        db = Address.DatabaseConnector()
+        db = DatabaseConnector()
         db.connect_to_db()
         response = db.get_answer(bottom_left.longitude, top_right.longitude,
                                  bottom_left.latitude, top_right.latitude,
                                  tags)
-        points = set()
-        db.close_data_base()
-        for point in response:
-            address = GeodesicCoordinates(point.lat, point.lon)
-            points.add(Point(address, point.amenity))
-        return points
+        return set(response)
 
 
 class PathFinder:

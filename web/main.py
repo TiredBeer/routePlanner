@@ -4,27 +4,30 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-
 # Добавление middleware для поддержки CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Разрешить запросы с любых источников
     allow_credentials=True,
     allow_methods=["*"],  # Разрешить все методы (GET, POST, OPTIONS и т.д.)
-    allow_headers=["*"]   # Разрешить все заголовки
+    allow_headers=["*"]  # Разрешить все заголовки
 )
 
 
-class CounterUpdate(BaseModel):
-    counter: int
+class Query(BaseModel):
+    address: str
+    radius: float
+    place_type: list[str]
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.post("/api/places/search/")
+async def search_places(data: Query):
+    # Здесь вы можете добавить логику поиска интересных мест
+    # Пример данных для демонстрации
+    print(data)
+    results = [
+        {"name": "Музей искусств", "address": "ул. Ленина, 10"},
+        {"name": "Театр драмы", "address": "просп. Мира, 5"}
+    ]
 
-
-@app.post("/update_counter")
-async def update_counter(data: CounterUpdate):
-    print(f"Received counter: {data.counter}")
-    return {"status": "success", "received_counter": data.counter}
+    return {"results": results}

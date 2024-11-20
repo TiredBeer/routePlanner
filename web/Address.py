@@ -1,32 +1,6 @@
 from PointObject.Point import Point
-from PointObject.GeodesicCoordinates import GeodesicCoordinates
-
-
-class ArtObject(Point):
-    def __init__(self, lon: float, lat: float, answer: dict) -> None:
-        super().__init__(GeodesicCoordinates(lat, lon), answer['tags'])
-        self.id = answer['id']
-        self.name = answer['name']
-        self.amenity = 'art_object'
-        self.category = answer['category']
-
-    def __str__(self) -> str:
-        return (f'{self.name} at {self.coordinates.latitude}, '
-                f'{self.coordinates.longitude}')
-
-
-class Address(Point):
-    def __init__(self, lon: float, lat: float, answer: dict) -> None:
-        super().__init__(GeodesicCoordinates(lat, lon), answer['tags'])
-        self.id = answer["id"]
-        self.street = answer["street"]
-        self.house = answer["house"]
-        self.amenity = answer["amenity"]
-        self.name = answer["name"]
-
-    def __str__(self):
-        return (f"{self.street}, {self.house} at {self.coordinates.latitude},"
-                f" {self.coordinates.longitude}")
+from PointObject.Address import Address
+from PointObject.ArtObject import ArtObject
 
 
 import psycopg2

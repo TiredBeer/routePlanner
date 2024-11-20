@@ -113,7 +113,7 @@ class PathFinder:
 #
 if __name__ == '__main__':
 
-    pf = PathFinder('Фонвизина 8', 2, ['art_object'])
+    pf = PathFinder('Фонвизина 8', 2, ['bar'])
 #     points = {Point(GeodesicCoordinates(0.01, -0.01)),
 #               Point(GeodesicCoordinates(0.01, 0.01)),
 #               Point(GeodesicCoordinates(0.02, 0.02)),

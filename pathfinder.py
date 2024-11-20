@@ -60,8 +60,8 @@ class BDRequests:
                     start_point).get_length() >= length:
                 break
         while True:
-            top_right.latitude -= delta
-            top_right.longitude -= delta
+            top_right.latitude += delta
+            top_right.longitude += delta
             if top_right.convert_to_plane(start_point).get_length() >= length:
                 break
         response = BDRequests.bd.do_magic(bottom_left, top_right)

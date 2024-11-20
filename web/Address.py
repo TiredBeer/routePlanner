@@ -1,34 +1,32 @@
-class Point:
-    def __init__(self, lon: float, lat: float) -> None:
-        self.lon = lon
-        self.lat = lat
+from PointObject.Point import Point
+from PointObject.GeodesicCoordinates import GeodesicCoordinates
 
 
 class ArtObject(Point):
     def __init__(self, lon: float, lat: float, answer: dict) -> None:
-        super().__init__(lon, lat)
+        super().__init__(GeodesicCoordinates(lat, lon), answer['tags'])
         self.id = answer['id']
         self.name = answer['name']
         self.amenity = 'art_object'
         self.category = answer['category']
-        self.tags = answer['tags']
 
     def __str__(self) -> str:
-        return f'{self.name} at {self.lat}, {self.lon}'
+        return (f'{self.name} at {self.coordinates.latitude}, '
+                f'{self.coordinates.longitude}')
 
 
 class Address(Point):
     def __init__(self, lon: float, lat: float, answer: dict) -> None:
-        super().__init__(lon, lat)
+        super().__init__(GeodesicCoordinates(lat, lon), answer['tags'])
         self.id = answer["id"]
         self.street = answer["street"]
         self.house = answer["house"]
         self.amenity = answer["amenity"]
         self.name = answer["name"]
-        self.tags = answer["tags"]
 
     def __str__(self):
-        return f"{self.street}, {self.house} at {self.lat}, {self.lon}"
+        return (f"{self.street}, {self.house} at {self.coordinates.latitude},"
+                f" {self.coordinates.longitude}")
 
 
 import psycopg2
@@ -56,6 +54,7 @@ class DatabaseConnector:
         'place_of_worship',
         'library',
         'university',
+        'art_object'
     ]
 
     def __init__(self):
@@ -74,7 +73,7 @@ class DatabaseConnector:
         :param max_lon: максимальная долгота
         :param min_lat: минимальная широта
         :param max_lat: максимальная широта
-        :param tags: (по умолчанию уже стоят) теги для не арт-объектов
+        :param tags: (по умолчанию стоят все) типы объектов
         :return: список из точек, тип которых или Address, или ArtObject
         """
         if tags is None:
@@ -88,6 +87,9 @@ class DatabaseConnector:
             address = Address(float(result['lon']), float(result['lat']),
                               result)
             answer.append(address)
+
+        if 'art_object' not in tags:
+            return answer
 
         for result in self._get_answer_from_art((min_lon, max_lon),
                                                 (min_lat, max_lat)):

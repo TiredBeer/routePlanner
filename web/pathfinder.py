@@ -1,5 +1,7 @@
 import math
 import pymap3d as pm
+import Address
+import APIYandex
 
 
 class PlaneCoordinates:
@@ -26,6 +28,9 @@ class GeodesicCoordinates:
                                  0)
         return PlaneCoordinates(result[0], result[1])
 
+    def __repr__(self):
+        return f'{self.latitude},{self.longitude}'
+
 
 class Point:
     def __init__(self, address: GeodesicCoordinates,
@@ -36,23 +41,28 @@ class Point:
     def get_tags(self) -> set[str]:
         return self.tags
 
+    def __repr__(self):
+        return f'{self.coordinates}'
+
 
 class BDRequests:
     bd = None
 
     @staticmethod
     def get_geographic_coordinates(address: str) -> GeodesicCoordinates:
-        raise NotImplemented
+        parser = APIYandex.YandexApiGeocoderParser()
+        response = parser.get_cords(address)
+        return GeodesicCoordinates(response[1], response[0])
 
     @staticmethod
-    def get_points(start_point: GeodesicCoordinates, length: float) \
+    def get_points(start_point: GeodesicCoordinates, length: float, tags) \
             -> set[Point]:
         length = math.sqrt(2) * length
-        delta = 0.0001
-        bottom_left = GeodesicCoordinates(start_point.longitude,
-                                          start_point.latitude)
-        top_right = GeodesicCoordinates(start_point.longitude,
-                                        start_point.latitude)
+        delta = 0.000001
+        bottom_left = GeodesicCoordinates(start_point.latitude,
+                                          start_point.longitude)
+        top_right = GeodesicCoordinates(start_point.latitude,
+                                        start_point.longitude)
         while True:
             bottom_left.latitude -= delta
             bottom_left.longitude -= delta
@@ -64,19 +74,29 @@ class BDRequests:
             top_right.longitude += delta
             if top_right.convert_to_plane(start_point).get_length() >= length:
                 break
-        response = BDRequests.bd.do_magic(bottom_left, top_right)
-        return response
+        db = Address.DatabaseConnector()
+        db.connect_to_db()
+        response = db.get_answer(bottom_left.longitude, top_right.longitude,
+                                 bottom_left.latitude, top_right.latitude,
+                                 tags)
+        points = set()
+        db.close_data_base()
+        for point in response:
+            address = GeodesicCoordinates(point.lat, point.lon)
+            points.add(Point(address, point.amenity))
+        return points
 
 
 class PathFinder:
     meters_per_hour = 3000
 
-    def __init__(self, start_loc: GeodesicCoordinates, points: set[Point],
-                 desired_time: float) -> None:
+    def __init__(self, address: str, desired_time: float,
+                 tags) -> None:
+        start_loc = BDRequests.get_geographic_coordinates(address)
         self.start_point = Point(start_loc)
         self.current_point = self.start_point
         self.desired_length = desired_time * PathFinder.meters_per_hour
-        self.points = points
+        self.points = BDRequests.get_points(start_loc, self.desired_length, tags)
         self.points.add(self.start_point)
         self.plane_points = dict[Point, PlaneCoordinates]()
         self.update_distances()
@@ -131,14 +151,16 @@ class PathFinder:
         for point in self.points:
             self.plane_points[point] = point.coordinates.convert_to_plane(
                 self.current_point.coordinates)
-
-
+#
+#
 if __name__ == '__main__':
-    points = {Point(GeodesicCoordinates(0.01, -0.01)),
-              Point(GeodesicCoordinates(0.01, 0.01)),
-              Point(GeodesicCoordinates(0.02, 0.02)),
-              Point(GeodesicCoordinates(0.03, 0.00))}
-    pathfinder = PathFinder(GeodesicCoordinates(0, 0), points, 7)
-    paaths = pathfinder.find_all_paths()
-    paath = pathfinder.find_path()
+
+    pf = PathFinder('Фонвизина 8', 2, ['art_object'])
+#     points = {Point(GeodesicCoordinates(0.01, -0.01)),
+#               Point(GeodesicCoordinates(0.01, 0.01)),
+#               Point(GeodesicCoordinates(0.02, 0.02)),
+#               Point(GeodesicCoordinates(0.03, 0.00))}
+#     pathfinder = PathFinder(GeodesicCoordinates(0, 0), points, 7)
+    paaths = pf.find_all_paths()
+    paath = pf.find_path()
     print(paath)

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Поиск интересных точек</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+  <h1>Поиск интересных точек</h1>
+
+  <label for="address">Адрес:</label>
+  <input type="text" id="address" name="address" placeholder="Введите ваш адрес">
+
+  <label for="radius">Радиус (км):</label>
+  <input type="number" id="radius" name="radius" min="1" placeholder="Введите радиус">
+
+  <label for="placeTypes">Выберите типы мест:</label>
+  <select id="placeTypes" name="placeTypes" multiple>
+    <option value="museum">Музей</option>
+    <option value="theater">Театр</option>
+    <option value="pub">Паб</option>
+    <option value="park">Парк</option>
+    <option value="restaurant">Ресторан</option>
+  </select>
+
+  <button id="searchButton">Найти</button>
+
+  <!-- Элемент для отображения результатов -->
+  <div id="results"></div>
+</div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>

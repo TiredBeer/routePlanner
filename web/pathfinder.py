@@ -96,15 +96,40 @@ class PathFinder:
         self.start_point = Point(start_loc)
         self.current_point = self.start_point
         self.desired_length = desired_time * PathFinder.meters_per_hour
-        self.points = BDRequests.get_points(start_loc, self.desired_length, tags)
+        self.points = BDRequests.get_points(start_loc, self.desired_length,
+                                            tags)
         self.points.add(self.start_point)
         self.plane_points = dict[Point, PlaneCoordinates]()
         self.update_distances()
 
     def find_path(self) -> list[Point]:
-        paths = self.find_all_paths()
-        sorted_paths = sorted(paths, key=lambda p: len(p), reverse=True)
-        return sorted_paths[0]
+        # paths = self.find_all_paths()
+        # sorted_paths = sorted(paths, key=lambda p: len(p), reverse=True)
+        # return sorted_paths[0]
+        return self.the_dumbest_greedy_algorithm()
+
+    def the_dumbest_greedy_algorithm(self):
+        paths = list[list[Point]]()
+        path = []
+        unused = set(self.points)
+        remaining_length = self.desired_length
+        current_point = self.start_point
+        length = self.desired_length
+        plane_start_point = self.plane_points[self.start_point]
+        while True:
+            plane_point = self.plane_points[current_point]
+            closest_point = min(unused, key=lambda p: self.plane_points[
+                p].get_distance_to(plane_point))
+            plane_closest_point = self.plane_points[closest_point]
+            length -= self.plane_points[current_point].get_distance_to(
+                plane_closest_point)
+            if plane_closest_point.get_distance_to(plane_start_point) > length:
+                break
+            path.append(closest_point)
+            current_point = closest_point
+            unused.remove(closest_point)
+        path.append(self.start_point)
+        return path
 
     def find_all_paths(self) -> list[list[Point]]:
         paths = list[list[Point]]()
@@ -151,16 +176,27 @@ class PathFinder:
         for point in self.points:
             self.plane_points[point] = point.coordinates.convert_to_plane(
                 self.current_point.coordinates)
+
+
 #
 #
 if __name__ == '__main__':
+    pf = PathFinder('Фонвизина 8', 1, ['art_object'])
+    #     points = {Point(GeodesicCoordinates(0.01, -0.01)),
+    #               Point(GeodesicCoordinates(0.01, 0.01)),
+    #               Point(GeodesicCoordinates(0.02, 0.02)),
+    #               Point(GeodesicCoordinates(0.03, 0.00))}
+    #     pathfinder = PathFinder(GeodesicCoordinates(0, 0), points, 7)
+    # paaths = pf.find_all_paths()
+    paath = pf.the_dumbest_greedy_algorithm()
+    length = 0
+    current = paath[0]
+    for path in paath[1: len(paath)]:
+        next = path
+        if next == current:
+            break
+        length += pf.plane_points[current].get_distance_to(
+            pf.plane_points[next])
+        current = next
 
-    pf = PathFinder('Фонвизина 8', 2, ['art_object'])
-#     points = {Point(GeodesicCoordinates(0.01, -0.01)),
-#               Point(GeodesicCoordinates(0.01, 0.01)),
-#               Point(GeodesicCoordinates(0.02, 0.02)),
-#               Point(GeodesicCoordinates(0.03, 0.00))}
-#     pathfinder = PathFinder(GeodesicCoordinates(0, 0), points, 7)
-    paaths = pf.find_all_paths()
-    paath = pf.find_path()
     print(paath)

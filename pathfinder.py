@@ -1,5 +1,7 @@
 import math
 import pymap3d as pm
+import Address
+import APIYandex
 
 
 class PlaneCoordinates:
@@ -42,7 +44,9 @@ class BDRequests:
 
     @staticmethod
     def get_geographic_coordinates(address: str) -> GeodesicCoordinates:
-        raise NotImplemented
+        parser = APIYandex.YandexApiGeocoderParser()
+        response = parser.get_cords(address)
+        return GeodesicCoordinates(response[0], response[1])
 
     @staticmethod
     def get_points(start_point: GeodesicCoordinates, length: float) \
@@ -64,15 +68,22 @@ class BDRequests:
             top_right.longitude -= delta
             if top_right.convert_to_plane(start_point).get_length() >= length:
                 break
-        response = BDRequests.bd.do_magic(bottom_left, top_right)
-        return response
+        db = Address.DatabaseConnector()
+        response = db.get_answer(bottom_left.longitude, top_right.longitude,
+                                                        bottom_left.latitude, top_right.latitude)
+        points = set()
+        for point in response:
+            address = GeodesicCoordinates(point.lat, point.lon)
+            points.add(Point(address, point.tags))
+        return points
 
 
 class PathFinder:
     meters_per_hour = 3000
 
-    def __init__(self, start_loc: GeodesicCoordinates, points: set[Point],
+    def __init__(self, address: str, points: set[Point],
                  desired_time: float) -> None:
+        start_loc = BDRequests.get_geographic_coordinates(address)
         self.start_point = Point(start_loc)
         self.current_point = self.start_point
         self.desired_length = desired_time * PathFinder.meters_per_hour

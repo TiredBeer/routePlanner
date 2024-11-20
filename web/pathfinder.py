@@ -72,10 +72,10 @@ class PathFinder:
         remaining_length = self.desired_length
         plane_start_point = self.plane_points[self.start_point]
         while True:
+            plane_current_point = self.plane_points[current_point]
             closest_point = min(unused, key=lambda p: self.plane_points[
                 p].get_distance_to(plane_current_point))
             plane_closest_point = self.plane_points[closest_point]
-            plane_current_point = self.plane_points[current_point]
             remaining_length -= plane_current_point.get_distance_to(
                 plane_closest_point)
             if plane_closest_point.get_distance_to(

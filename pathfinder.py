@@ -69,11 +69,13 @@ class BDRequests:
 
 
 class PathFinder:
+    meters_per_hour = 3000
+
     def __init__(self, start_loc: GeodesicCoordinates, points: set[Point],
                  desired_time: float) -> None:
         self.start_point = Point(start_loc)
         self.current_point = self.start_point
-        self.desired_length = desired_time * 3
+        self.desired_length = desired_time * PathFinder.meters_per_hour
         self.points = points
         self.points.add(self.start_point)
         self.plane_points = dict[Point, PlaneCoordinates]()
@@ -132,11 +134,11 @@ class PathFinder:
 
 
 if __name__ == '__main__':
-    points = {Point(GeodesicCoordinates(1, -1)),
-              Point(GeodesicCoordinates(1, 1)),
-              Point(GeodesicCoordinates(2, 2)),
-              Point(GeodesicCoordinates(3, 0))}
+    points = {Point(GeodesicCoordinates(0.01, -0.01)),
+              Point(GeodesicCoordinates(0.01, 0.01)),
+              Point(GeodesicCoordinates(0.02, 0.02)),
+              Point(GeodesicCoordinates(0.03, 0.00))}
     pathfinder = PathFinder(GeodesicCoordinates(0, 0), points, 7)
     paaths = pathfinder.find_all_paths()
     paath = pathfinder.find_path()
-    print(pathfinder.find_all_paths())
+    print(paath)

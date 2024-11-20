@@ -189,14 +189,5 @@ if __name__ == '__main__':
     #     pathfinder = PathFinder(GeodesicCoordinates(0, 0), points, 7)
     # paaths = pf.find_all_paths()
     paath = pf.the_dumbest_greedy_algorithm()
-    length = 0
-    current = paath[0]
-    for path in paath[1: len(paath)]:
-        next = path
-        if next == current:
-            break
-        length += pf.plane_points[current].get_distance_to(
-            pf.plane_points[next])
-        current = next
 
     print(paath)

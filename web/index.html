@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Поиск интересных точек</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Подключение стилей для карты -->
+  <style>
+    #map {
+      width: 100%;
+      height: 500px;
+      margin-top: 20px;
+    }
+  </style>
+  <!-- Подключение API Яндекс.Карт -->
+  <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=4a4752ab-1d5e-4025-a203-7cc8b10e5f24" type="text/javascript"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Поиск интересных точек</h1>
+
+    <label for="address">Адрес:</label>
+    <input type="text" id="address" name="address" placeholder="Введите ваш адрес">
+
+    <label for="radius">Радиус (км):</label>
+    <input type="number" id="radius" name="radius" min="1" placeholder="Введите радиус">
+
+    <label for="placeTypes">Выберите типы мест:</label>
+    <select id="placeTypes" name="placeTypes" multiple>
+      <option value="cafe">Кафе</option>
+      <option value="theater">Театр</option>
+      <option value="pub">Паб</option>
+      <option value="park">Парк</option>
+      <option value="restaurant">Ресторан</option>
+    </select>
+
+    <button id="searchButton">Найти</button>
+
+    <!-- Элемент для отображения результатов -->
+    <div id="results"></div>
+
+    <!-- Контейнер для карты -->
+    <div id="map"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -73,6 +73,8 @@ class PathFinder:
         plane_start_point = self.plane_points[self.start_point]
         while True:
             plane_current_point = self.plane_points[current_point]
+            if not unused:
+                break
             closest_point = min(unused, key=lambda p: self.plane_points[
                 p].get_distance_to(plane_current_point))
             plane_closest_point = self.plane_points[closest_point]
@@ -89,7 +91,7 @@ class PathFinder:
 
 
 if __name__ == '__main__':
-    pf = PathFinder('Фонвизина 8', 1, ['cafe'])
+    pf = PathFinder('Фонвизина 8', 1, ['bar'])
     test_path = pf.the_dumbest_greedy_algorithm()
 
     print(test_path)

@@ -40,9 +40,13 @@ document.getElementById('searchButton').addEventListener('click', () => {
 
       myMap.geoObjects.removeAll(); // Удаление предыдущих меток
 
+      const points = [];
+
       if (data && Array.isArray(data.results) && data.results.length > 0) {
         data.results.forEach(place => {
           const coords = place.coordinates.split(',').map(coord => parseFloat(coord.trim()));
+          points.push(coords);
+
           const placemark = new ymaps.Placemark(coords, {
             balloonContent: `<strong>${place.name}</strong><br>${place.address}`
           }, {
@@ -51,6 +55,19 @@ document.getElementById('searchButton').addEventListener('click', () => {
 
           myMap.geoObjects.add(placemark);
         });
+
+        if (points.length > 1) {
+          ymaps.route(points, {
+            mapStateAutoApply: true
+          }).then(route => {
+            myMap.geoObjects.add(route);
+          }).catch(error => {
+            console.error('Ошибка при построении маршрута:', error);
+            alert('Не удалось построить маршрут.');
+          });
+        } else {
+          alert('Недостаточно точек для построения маршрута.');
+        }
 
         const bounds = myMap.geoObjects.getBounds();
         if (bounds) {

@@ -1,25 +1,61 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Rubik Mono One', sans-serif;
+}
+
 body {
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(52, 46, 55, 1);
 }
 
 .container {
-  text-align: center;
-  width: 300px;
+    text-align: center;
+    position: relative;
+    max-width: 700px;
+    width: 55%;
+    padding: 25px;
+    border-radius: 8px;
+}
+
+
+.container header {
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+.header-img {
+    scale: 0.8;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
+
+.container label {
+    display: block;
+    color: rgba(243, 237, 247, 1);
+    margin: 15px;
+
 }
 
 input, select, button {
-  margin-top: 10px;
-  width: 100%;
-  padding: 8px;
+    display: block;
+    margin-top: 10px;
+    width: 100%;
+    padding: 16px;
+    border-radius: 10px;
+    color: #362e43;
 }
 
+
+
 #map {
-  width: 100%;
-  height: 500px;
-  margin-top: 20px;
+    width: 100%;
+    height: 500px;
+    margin-top: 20px;
 }

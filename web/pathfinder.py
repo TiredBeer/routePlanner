@@ -42,6 +42,7 @@ class BDRequests:
         response = db.get_answer(bottom_left.longitude, top_right.longitude,
                                  bottom_left.latitude, top_right.latitude,
                                  tags)
+        db.close_data_base()
         return set(response)
 
 

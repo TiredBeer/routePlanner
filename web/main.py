@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import pathfinder
 
@@ -15,11 +17,21 @@ app.add_middleware(
     allow_headers=["*"]  # Разрешить все заголовки
 )
 
+# Подключение статических файлов (CSS, JS, изображения)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 class Query(BaseModel):
     address: str
     radius: float
     place_type: list[str]
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    with open("index.html", "r", encoding="utf-8") as file:
+        content = file.read()
+    return HTMLResponse(content=content, status_code=200)
 
 
 @app.post("/api/places/search/")
@@ -31,4 +43,3 @@ async def search_places(data: Query):
     results = [{"name": place.__repr__(), "address": place.__repr__(), "coordinates": place.__repr__()} for place in test_path]
 
     return {"results": results}
-    # return test_path

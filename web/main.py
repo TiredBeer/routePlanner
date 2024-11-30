@@ -40,6 +40,7 @@ async def search_places(data: Query):
     pf = pathfinder.PathFinder(data.address, data.radius, data.place_type)
     test_path = pf.the_dumbest_greedy_algorithm()
     print(test_path)
-    results = [{"name": place.__repr__(), "address": place.__repr__(), "coordinates": place.__repr__()} for place in test_path]
+    results = [{"name": place.name, "address": place.__repr__(), "coordinates":
+        place.__repr__()} for place in test_path]
 
     return {"results": results}

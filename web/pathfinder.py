@@ -1,7 +1,7 @@
 import math
 # hello
-from Address import DatabaseConnector
-from APIYandex import YandexApiGeocoderParser
+from web.Address import DatabaseConnector
+from web.APIYandex import YandexApiGeocoderParser
 
 from PointObject.Point import Point
 from PointObject.PlaneCoordinates import PlaneCoordinates
@@ -11,6 +11,7 @@ from PointObject.GeodesicCoordinates import GeodesicCoordinates
 class BDRequests:
     bd = None
     approximation_delta = 0.00001
+    length_approximation_ratio = math.sqrt(2) * 1.2
 
     @staticmethod
     def get_geographic_coordinates(address: str) -> GeodesicCoordinates:
@@ -22,21 +23,8 @@ class BDRequests:
     def get_points(start_point: GeodesicCoordinates, length: float, tags) \
             -> set[Point]:
         length = math.sqrt(2) * length
-        bottom_left = GeodesicCoordinates(start_point.latitude,
-                                          start_point.longitude)
-        top_right = GeodesicCoordinates(start_point.latitude,
-                                        start_point.longitude)
-        while True:
-            bottom_left.latitude -= BDRequests.approximation_delta
-            bottom_left.longitude -= BDRequests.approximation_delta
-            if bottom_left.convert_to_plane(
-                    start_point).get_length() >= length:
-                break
-        while True:
-            top_right.latitude += BDRequests.approximation_delta
-            top_right.longitude += BDRequests.approximation_delta
-            if top_right.convert_to_plane(start_point).get_length() >= length:
-                break
+        bottom_left, top_right = BDRequests.get_rectangle_approximation_of_area(
+            start_point, length)
         db = DatabaseConnector()
         db.connect_to_db()
         response = db.get_answer(bottom_left.longitude, top_right.longitude,
@@ -44,18 +32,45 @@ class BDRequests:
                                  tags)
         return set(response)
 
+    @staticmethod
+    def get_rectangle_approximation_of_area(start_point: GeodesicCoordinates,
+                                            length: float) \
+            -> tuple[GeodesicCoordinates, GeodesicCoordinates]:
+        length = length * BDRequests.length_approximation_ratio
+        bottom_left = GeodesicCoordinates(start_point.latitude,
+                                          start_point.longitude)
+        top_right = GeodesicCoordinates(start_point.latitude,
+                                        start_point.longitude)
+        while True:
+            bottom_left.latitude -= BDRequests.approximation_delta
+            bottom_left.longitude -= BDRequests.approximation_delta * 2
+            if bottom_left.convert_to_plane(
+                    start_point).get_length() >= length:
+                break
+        while True:
+            top_right.latitude += BDRequests.approximation_delta
+            top_right.longitude += BDRequests.approximation_delta * 2
+            if top_right.convert_to_plane(start_point).get_length() >= length:
+                break
+        return bottom_left, top_right
+
 
 class PathFinder:
     meters_per_hour = 3000
 
     def __init__(self, address: str, desired_time: float,
-                 tags) -> None:
-        start_loc = BDRequests.get_geographic_coordinates(address)
+                 tags, points: set[Point] = None,
+                 start_loc: GeodesicCoordinates = None) -> None:
+        if start_loc is None:
+            start_loc = BDRequests.get_geographic_coordinates(address)
         self.start_point = Point(start_loc)
         self.current_point = self.start_point
         self.desired_length = desired_time * PathFinder.meters_per_hour
-        self.points = BDRequests.get_points(start_loc, self.desired_length,
-                                            tags)
+        if points is None:
+            self.points = BDRequests.get_points(start_loc, self.desired_length,
+                                                tags)
+        else:
+            self.points = points
         self.points.add(self.start_point)
         self.plane_points = dict[Point, PlaneCoordinates]()
         for point in self.points:

@@ -38,11 +38,9 @@ class BDRequests:
             if top_right.convert_to_plane(start_point).get_length() >= length:
                 break
         db = DatabaseConnector()
-        db.connect_to_db()
         response = db.get_answer(bottom_left.longitude, top_right.longitude,
                                  bottom_left.latitude, top_right.latitude,
                                  tags)
-        db.close_data_base()
         return set(response)
 
 

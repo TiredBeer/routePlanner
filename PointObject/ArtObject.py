@@ -1,14 +1,28 @@
 from PointObject.Point import Point
 from PointObject.GeodesicCoordinates import GeodesicCoordinates
 
+from sqlalchemy import Column, Float, String, Integer, JSON
+from sqlalchemy.ext.declarative import declarative_base
 
-class ArtObject(Point):
-    def __init__(self, lon: float, lat: float, answer: dict) -> None:
-        super().__init__(GeodesicCoordinates(lat, lon), answer['tags'])
-        self.id = answer['id']
-        self.name = answer['name']
-        self.amenity = 'art_object'
-        self.category = answer['category']
+
+Base = declarative_base()
+
+
+class ArtObject(Base, Point):
+    __tablename__ = 'ArtObjects'
+
+    id = Column(Integer, primary_key=True)
+    lon = Column(Float, nullable=False)
+    lat = Column(Float, nullable=False)
+    name = Column(String, nullable=False)
+    amenity = 'art_object'
+    category = Column(String, nullable=False)
+
+    def __init__(self):
+        Base.__init__(self)
+        Point.__init__(self, GeodesicCoordinates(latitude=self.lat,
+                                                 longitude=self.lon),
+                       set(self.category))
 
     def __str__(self) -> str:
         return (f'{self.name} at {self.coordinates.latitude}, '

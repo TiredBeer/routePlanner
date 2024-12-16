@@ -1,19 +1,14 @@
-from PointObject.Point import Point
+from sqlalchemy import create_engine, and_
+from sqlalchemy.orm import scoped_session, sessionmaker
+
 from PointObject.Address import Address
 from PointObject.ArtObject import ArtObject
-
-
-import psycopg2
-from psycopg2.extras import RealDictCursor
+from PointObject.Point import Point
 
 
 class DatabaseConnector:
 
-    _host = 'b19mrygsbv2ejyfwxeb8-postgresql.services.clever-cloud.com'
-    _port = 50013
-    _user = 'upisxsl8ebyt76zvmwdc'
-    _password = 'k7W50CFPTAjR3GsTHZL2PrTQsSV4ud'
-    _db_name = 'b19mrygsbv2ejyfwxeb8'
+    _url = 'postgresql://upisxsl8ebyt76zvmwdc:k7W50CFPTAjR3GsTHZL2PrTQsSV4ud@b19mrygsbv2ejyfwxeb8-postgresql.services.clever-cloud.com:50013/b19mrygsbv2ejyfwxeb8'
 
     tags: list[str] = [
         'theatre',
@@ -32,11 +27,12 @@ class DatabaseConnector:
     ]
 
     def __init__(self):
-        self.answer = list()
-        self._connection = None
+        self.engine = self._create_engine()
+        self.Session = scoped_session(sessionmaker(bind=self.engine))
+        self.session = self.Session()
 
-    def __enter__(self):
-        return self.connect_to_db()
+    def _create_engine(self):
+        return create_engine(self._url, echo=False)
 
     def get_answer(self, min_lon: float, max_lon: float,
                    min_lat: float, max_lat: float, tags=None) -> list[Point]:
@@ -53,80 +49,21 @@ class DatabaseConnector:
         if tags is None:
             tags = self.tags
 
-        answer = []
+        query_filters = [
+            Address.lon.between(min_lon, max_lon),
+            Address.lat.between(min_lat, max_lat),
+            Address.amenity.in_(tags)
+        ]
 
-        for result in self._get_answer_from_objects((min_lon, max_lon),
-                                                    (min_lat, max_lat),
-                                                    tags):
-            address = Address(float(result['lon']), float(result['lat']),
-                              result)
-            answer.append(address)
+        answer = self.session.query(Address).filter(and_(*query_filters)).all()
+        answer = [Point.address_to_point(a) for a in answer]
 
-        if 'art_object' not in tags:
-            return answer
-
-        for result in self._get_answer_from_art((min_lon, max_lon),
-                                                (min_lat, max_lat)):
-            address = ArtObject(float(result['lon']), float(result['lat']),
-                                result)
-            answer.append(address)
+        if 'art_object' in tags:
+            art_objects = self.session.query(ArtObject).filter(
+                and_(ArtObject.lon.between(min_lon, max_lon),
+                ArtObject.lat.between(min_lat, max_lat))
+            ).all()
+            art_objects = [Point.art_object_to_point(a) for a in art_objects]
+            answer.extend(art_objects)
 
         return answer
-
-    def _get_answer_from_objects(self,
-                   lon: tuple[float, float],
-                   lat: tuple[float, float],
-                   tags: list[str]) -> list[dict[str, str]]:
-        command = self._get_command_for_objects((lon[0], lon[1]),
-                                                (lat[0], lat[1]))
-        with self._connection.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(command, (tuple(tags),))
-            result = cur.fetchall()
-
-        return result
-
-    def _get_answer_from_art(self,
-                    lon: tuple[float, float],
-                    lat: tuple[float, float]) -> list[dict[str, str]]:
-        command = self._get_command_for_art((lon[0], lon[1]),
-                                            (lat[0], lat[1]))
-        with self._connection.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(command)
-            result = cur.fetchall()
-
-        return result
-
-
-    @staticmethod
-    def _get_command_for_objects(lon: tuple[float, float],
-                     lat: tuple[float, float]) -> str:
-        return f"""SELECT * FROM Objects WHERE lon BETWEEN {lon[0]} AND {lon[1]} AND lat BETWEEN {lat[0]} AND {lat[1]} AND amenity IN %s"""
-
-    @staticmethod
-    def _get_command_for_art(lon: tuple[float, float],
-                                 lat: tuple[float, float]) -> str:
-        return f"""SELECT * FROM ArtObjects WHERE lon BETWEEN {lon[0]} AND {lon[1]} AND lat BETWEEN {lat[0]} AND {lat[1]}"""
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self._connection.close()
-        if exc_type is None:
-            print('Произошло это: ', exc_type, exc_val, exc_tb)
-            return True
-        return False
-
-    def connect_to_db(self):
-        try:
-            self._connection = psycopg2.connect(
-                host=DatabaseConnector._host,
-                user=DatabaseConnector._user,
-                password=DatabaseConnector._password,
-                database=DatabaseConnector._db_name,
-                port=DatabaseConnector._port
-            )
-            return self
-        except psycopg2.Error as e:
-            print("Ну там бд сдохла похоже, не подключилось к ней :(")
-            raise e
-
-    def close_data_base(self):
-        self._connection.close()

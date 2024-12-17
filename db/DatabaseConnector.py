@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from PointObject.Address import Address
-from PointObject.ArtObject import ArtObject
-from PointObject.Point import Point
+from db.utils.Address import Address
+from db.utils.ArtObject import ArtObject
+from pathfinder.utils.Point import Point
 
 
 class DatabaseConnector:

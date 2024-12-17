@@ -1,5 +1,5 @@
 import pymap3d as pm
-from .PlaneCoordinates import PlaneCoordinates
+from pathfinder.utils.PlaneCoordinates import PlaneCoordinates
 
 
 class GeodesicCoordinates:

@@ -2,8 +2,8 @@ import random
 import unittest
 from web.pathfinder import BDRequests
 from web.pathfinder import PathFinder
-from web.PointObject.GeodesicCoordinates import GeodesicCoordinates
-from web.PointObject.Point import Point
+from pathfinder.utils.GeodesicCoordinates import GeodesicCoordinates
+from pathfinder.utils.Point import Point
 
 
 # привет эдик

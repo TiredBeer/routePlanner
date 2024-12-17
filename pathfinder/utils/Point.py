@@ -1,4 +1,4 @@
-from .GeodesicCoordinates import GeodesicCoordinates
+from pathfinder.utils.GeodesicCoordinates import GeodesicCoordinates
 
 
 class Point:

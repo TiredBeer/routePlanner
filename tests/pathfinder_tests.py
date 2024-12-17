@@ -5,6 +5,10 @@ from web.pathfinder import PathFinder
 from web.PointObject.GeodesicCoordinates import GeodesicCoordinates
 from web.PointObject.Point import Point
 
+
+# привет эдик
+
+
 class ApproximationTests(unittest.TestCase):
     def test_approximation_overlaps_area(self):
         self.approximation_test(GeodesicCoordinates(60, 60), 1000)

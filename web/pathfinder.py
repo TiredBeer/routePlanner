@@ -1,11 +1,11 @@
 import math
 # hello
-from web.Address import DatabaseConnector
-from web.APIYandex import YandexApiGeocoderParser
+from Address import DatabaseConnector
+from APIYandex import YandexApiGeocoderParser
 
-from web.PointObject.Point import Point
-from web.PointObject.PlaneCoordinates import PlaneCoordinates
-from web.PointObject.GeodesicCoordinates import GeodesicCoordinates
+from PointObject.Point import Point
+from PointObject.PlaneCoordinates import PlaneCoordinates
+from PointObject.GeodesicCoordinates import GeodesicCoordinates
 
 
 class BDRequests:

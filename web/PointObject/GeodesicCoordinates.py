@@ -1,5 +1,5 @@
 import pymap3d as pm
-from web.PointObject.PlaneCoordinates import PlaneCoordinates
+from .PlaneCoordinates import PlaneCoordinates
 
 
 class GeodesicCoordinates:

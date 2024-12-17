@@ -2,9 +2,8 @@ import random
 import unittest
 from web.pathfinder import BDRequests
 from web.pathfinder import PathFinder
-from PointObject.GeodesicCoordinates import GeodesicCoordinates
-from PointObject.Point import Point
-
+from web.PointObject.GeodesicCoordinates import GeodesicCoordinates
+from web.PointObject.Point import Point
 
 class ApproximationTests(unittest.TestCase):
     def test_approximation_overlaps_area(self):

@@ -1,6 +1,3 @@
-from PointObject.Point import Point
-from PointObject.GeodesicCoordinates import GeodesicCoordinates
-
 from sqlalchemy import Column, Float, String, Integer, JSON
 from sqlalchemy.ext.declarative import declarative_base
 

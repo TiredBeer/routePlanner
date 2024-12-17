@@ -1,4 +1,4 @@
-from PointObject.GeodesicCoordinates import GeodesicCoordinates
+from web.PointObject.GeodesicCoordinates import GeodesicCoordinates
 
 
 class Point:

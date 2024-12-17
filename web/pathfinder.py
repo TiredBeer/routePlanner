@@ -3,9 +3,9 @@ import math
 from web.Address import DatabaseConnector
 from web.APIYandex import YandexApiGeocoderParser
 
-from PointObject.Point import Point
-from PointObject.PlaneCoordinates import PlaneCoordinates
-from PointObject.GeodesicCoordinates import GeodesicCoordinates
+from web.PointObject.Point import Point
+from web.PointObject.PlaneCoordinates import PlaneCoordinates
+from web.PointObject.GeodesicCoordinates import GeodesicCoordinates
 
 
 class BDRequests:
@@ -102,10 +102,3 @@ class PathFinder:
             unused.remove(closest_point)
         path.append(self.start_point)
         return path
-
-
-if __name__ == '__main__':
-    pf = PathFinder('Фонвизина 8', 1, ['bar'])
-    test_path = pf.the_dumbest_greedy_algorithm()
-
-    print(test_path)

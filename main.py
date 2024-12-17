@@ -15,8 +15,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.mount("/web/static", StaticFiles(directory="web/static"), name="web/static")
-
 
 class Query(BaseModel):
     address: str

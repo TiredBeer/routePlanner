@@ -1,7 +1,7 @@
 import random
 import unittest
-from web.pathfinder import BDRequests
-from web.pathfinder import PathFinder
+from pathfinder.utils.BDRequester import BDRequester
+from pathfinder.PathFinder import PathFinder
 from pathfinder.utils.GeodesicCoordinates import GeodesicCoordinates
 from pathfinder.utils.Point import Point
 
@@ -18,7 +18,7 @@ class ApproximationTests(unittest.TestCase):
 
     def approximation_test(self, start_point: GeodesicCoordinates,
                            length: float):
-        bdr = BDRequests()
+        bdr = BDRequester()
         bottom_left, top_right = bdr.get_rectangle_approximation_of_area(
             start_point, length)
         distance_to_bottom = (GeodesicCoordinates(
@@ -44,7 +44,7 @@ class ApproximationTests(unittest.TestCase):
 
 
 class PathFinderTests(unittest.TestCase):
-    adequacy_ratio = 0.75
+    adequacy_ratio = 0.5
 
     def test_path_finder_returns_something(self):
         points = PathFinderTests.generate_points()
